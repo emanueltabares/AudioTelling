@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Audiotelling by Euno</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#0B0E11;
+    --bg-2:#14191F;
+    --card:#1C1F26;
+    --muted:#90A4AE;
+    --accent-1:#06B6C4;
+    --accent-2:#B76CF6;
+    --text:#ECEFF1;
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  html,body{
+    height:100%;
+    margin:0;
+    background: linear-gradient(-45deg, #0B0E11, #14191F, #1a1f2e, #36111f, #0d1820);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+    font-family:'Poppins',sans-serif;
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  
+  .wrap{max-width:980px;margin:18px auto;padding:12px;display:flex;flex-direction:column;align-items:center;}
+  .logo{width:360px;margin-bottom:24px}
+  
+  h1{margin:0 0 16px 0;font-size:28px;color:var(--accent-1);text-align:center;font-weight:700}
+  p.desc{margin:0 0 20px;color:var(--text);text-align:center;font-size:17px;line-height:1.5;max-width:600px}
+  p.subdesc{margin:0 0 28px;color:var(--muted);text-align:center;font-size:15px;line-height:1.6;max-width:620px;padding:0 20px}
+  
+  /* player shared styles */
+  .player {
+    width:100%;
+    max-width:560px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.006));
+    border-radius:14px;
+    padding:16px;
+    box-shadow:0 12px 30px rgba(2,6,12,0.6);
+    border:1px solid rgba(255,255,255,0.03);
+    margin-bottom:18px;
+  }
+  .segment-title{font-weight:700;font-size:18px;margin-bottom:6px}
+  .segment-desc{color:var(--muted);font-size:15px;margin-bottom:12px;line-height:1.5}
+  .audio-row{display:flex;align-items:center;gap:12px}
+  .play-btn{
+    background:linear-gradient(180deg,var(--accent-1),var(--accent-2));
+    border:none;color:#02121a;border-radius:999px;width:56px;height:56px;font-weight:700;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(11,20,26,0.6)
+  }
+  .progress-wrap{flex:1;display:flex;flex-direction:column;gap:8px}
+  .progress-bar{height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden;cursor:pointer}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));transition:width .08s linear}
+  .time{font-size:13px;color:var(--muted);min-width:48px;text-align:right}
+  .choices{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+  .choice{
+    background:linear-gradient(180deg,var(--accent-1),var(--accent-2));
+    border:none;color:#02121a;padding:18px 28px;border-radius:12px;font-weight:700;cursor:pointer;font-size:20px;opacity:0;transition:opacity .25s, transform .2s;
+    box-shadow:0 4px 12px rgba(6,182,196,0.3);
+  }
+  .choice.show{opacity:1}
+  .choice:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(6,182,196,0.4)}
+  .choice:active{transform:translateY(0)}
+  .log{margin-top:10px;color:var(--muted);font-size:13px;max-height:120px;overflow:auto;display:none}
+  .hidden{display:none}
+  /* welcome */
+  #welcomeScreen{text-align:center;width:100%;max-width:620px;margin-bottom:18px}
+  #startBtn{
+    margin-top:20px;
+    background:linear-gradient(180deg,var(--accent-1),var(--accent-2));
+    border:none;color:#02121a;padding:18px 40px;border-radius:12px;font-weight:700;cursor:pointer;font-size:19px;
+    box-shadow:0 4px 12px rgba(6,182,196,0.3);
+    transition:transform .2s, box-shadow .2s;
+  }
+  #startBtn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(6,182,196,0.4)}
+  #startBtn:active{transform:translateY(0)}
+  /* closing modal */
+  .closing { 
+    width:100%; 
+    max-width:720px; 
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    padding:32px; 
+    border-radius:14px; 
+    color:var(--text); 
+    box-shadow:0 12px 30px rgba(0,0,0,0.6);
+    border:1px solid rgba(255,255,255,0.05);
+  }
+  .closing h2{font-size:26px;margin-top:0;margin-bottom:18px;color:var(--accent-1)}
+  .closing p{font-size:16px;line-height:1.7;margin:12px 0}
+  .closing button{
+    background:linear-gradient(180deg,var(--accent-1),var(--accent-2));
+    border:none;color:#02121a;padding:16px 32px;border-radius:12px;font-weight:700;cursor:pointer;font-size:17px;
+    box-shadow:0 4px 12px rgba(6,182,196,0.3);
+    transition:transform .2s, box-shadow .2s;
+  }
+  .closing button:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(6,182,196,0.4)}
+  .closing button:active{transform:translateY(0)}
+  /* responsive */
+  @media(max-width:520px){
+    .logo{width:260px}
+    .player{padding:14px}
+    .play-btn{width:48px;height:48px;font-size:16px}
+    h1{font-size:24px}
+    p.desc{font-size:15px}
+    p.subdesc{font-size:14px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <img class="logo" src="logo.png" alt="AudioTelling By Euno">
+
+    <h1>Escucha, Decide y Aprende.</h1>
+   
+    <!-- WELCOME SCREEN -->
+    <div id="welcomeScreen">
+       <p class="subdesc">Vive una experiencia interactiva de role-play donde enfrentarás situaciones reales de gestión de clientes. Cada decisión que tomes impactará el resultado de la conversación. Practica tus habilidades de comunicación y aprende las mejores estrategias para brindar soluciones efectivas en momentos críticos.</p>
+      <div class="player" style="margin-bottom:12px">
+        <div class="segment-title">Introducción</div>
+        <div class="segment-desc">Presiona "Iniciar la experiencia" para comenzar.</div>
+
+        <div class="audio-row" style="margin-top:8px">
+          <button class="play-btn" id="playBtn_intro">▶</button>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar_intro"><div class="progress-fill" id="progressFill_intro"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:13px;color:var(--muted)"></div>
+              <div class="time" id="time_intro">0:00</div>
+            </div>
+          </div>
+        </div>
+
+        <audio id="introAudio" src="00_intro_host.mp3" preload="auto"></audio>
+      </div>
+
+      <button id="startBtn">Iniciar la experiencia</button>
+    </div>
+    <!-- /WELCOME -->
+
+    <!-- PLAYER PRINCIPAL -->
+    <div id="mainPlayer" class="player hidden">
+      <div class="segment-title" id="segmentTitle">Cargando...</div>
+      <div class="segment-desc" id="segmentDesc"></div>
+
+      <div class="audio-row" style="margin-top:6px">
+        <button class="play-btn" id="playBtn_main">▶</button>
+
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar_main"><div class="progress-fill" id="progressFill_main"></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:13px;color:var(--muted)"></div>
+            <div class="time" id="time_main">0:00</div>
+          </div>
+        </div>
+      </div>
+
+      <audio id="audioMain" preload="auto"></audio>
+
+      <div class="choices" id="choices"></div>
+      <div class="log" id="log">Registro de decisiones: (vacío)</div>
+    </div>
+    <!-- /PLAYER PRINCIPAL -->
+
+    <!-- CLOSING CON FEEDBACK -->
+    <div id="closingContainer"></div>
+
+  </div>
+
+<script>
+/* ------------------------------
+   Utilidades y referencias DOM
+   ------------------------------ */
+const welcomeScreen = document.getElementById('welcomeScreen');
+const startBtn = document.getElementById('startBtn');
+
+/* Intro player elements */
+const introAudio = document.getElementById('introAudio');
+const playBtnIntro = document.getElementById('playBtn_intro');
+const progressBarIntro = document.getElementById('progressBar_intro');
+const progressFillIntro = document.getElementById('progressFill_intro');
+const timeIntro = document.getElementById('time_intro');
+
+/* Main player elements */
+const mainPlayer = document.getElementById('mainPlayer');
+const playBtnMain = document.getElementById('playBtn_main');
+const progressBarMain = document.getElementById('progressBar_main');
+const progressFillMain = document.getElementById('progressFill_main');
+const timeMain = document.getElementById('time_main');
+const audioMain = document.getElementById('audioMain');
+const segmentTitle = document.getElementById('segmentTitle');
+const segmentDesc = document.getElementById('segmentDesc');
+const choicesDiv = document.getElementById('choices');
+const logEl = document.getElementById('log');
+const closingContainer = document.getElementById('closingContainer');
+
+/* ------------------------------
+   Escenas
+   ------------------------------ */
+const scenes = {
+  inicio: { text:"La llamada está entrando...", desc:"Un cliente necesita hablar contigo urgentemente. ¿Qué estará pasando?", audio:"01_escena1_cl.mp3", next:"escena1_host" },
+  escena1_host: { text:"El tono de voz dice mucho...", desc:"¿Cómo vas a manejar esta situación?", audio:"01_escena1_host.mp3",
+    choices:[
+      { text:"Disculparse y resolver rápido", next:"decision1_A", good:false },
+      { text:"Pedir detalles para entender mejor", next:"decision1_B", good:true }
+    ]
+  },
+  decision1_A: { text:"El cliente responde a tu enfoque...", desc:"¿Será suficiente con lo que dijiste?", audio:"02_decision1_rutaA_cl.mp3", next:"02_decision1_rutaA_host" },
+  "02_decision1_rutaA_host": { text:"Momento de reflexión...", desc:"¿Tu primera reacción fue la ideal?", audio:"02_decision1_rutaA_host.mp3", next:"02_decision1_host_unificado" },
+  decision1_B: { text:"El cliente tiene más que decir...", desc:"Escuchar puede revelar información clave.", audio:"02_decision1_rutaB_cl.mp3", next:"02_decision1_rutaB_host" },
+  "02_decision1_rutaB_host": { text:"Tu estrategia está tomando forma...", desc:"A veces, lo más simple es lo más efectivo.", audio:"02_decision1_rutaB_host.mp3", next:"02_decision1_host_unificado" },
+  "02_decision1_host_unificado": { text:"Ahora conoces el problema real...", desc:"Es momento de actuar. El reloj está corriendo.", audio:"02_decision1_host_unificado.mp3", next:"escena2" },
+  escena2: { text:"La presión aumenta...", desc:"Tu siguiente movimiento será crucial.", audio:"03_escena2_host.mp3",
+    choices:[
+      { text:"Llamar al editor y corregir en 2 horas", next:"decision2_A", good:true },
+      { text:"Ofrecer enviar mañana con descuento", next:"decision2_B", good:false }
+    ]
+  },
+  decision2_A: { text:"La respuesta del cliente...", desc:"¿Habrás dado en el clavo?", audio:"04_decision2_rutaA_cl.mp3", next:"04_decision2_rutaA_host" },
+  "04_decision2_rutaA_host": { text:"Las decisiones rápidas tienen consecuencias...", desc:"Y en este caso, parecen ser buenas.", audio:"04_decision2_rutaA_host.mp3", next:"04_decision2_host_unificado" },
+  decision2_B: { text:"El cliente reacciona a tu propuesta...", desc:"No todas las soluciones funcionan igual.", audio:"04_decision2_rutaB_cl.mp3", next:"04_decision2_rutaB_host" },
+  "04_decision2_rutaB_host": { text:"A veces hay que cambiar el plan...", desc:"La flexibilidad también es una habilidad.", audio:"04_decision2_rutaB_host.mp3", next:"04_decision2_host_unificado" },
+  "04_decision2_host_unificado": { text:"El equipo se pone en acción...", desc:"Todo está en marcha. ¿Llegará a tiempo?", audio:"04_decision2_host_unificado.mp3", next:"escena3" },
+  escena3: { text:"Momento de la entrega final...", desc:"Este es el momento de la verdad.", audio:"05_escena3_host.mp3", next:"05_escena3_cl" },
+  "05_escena3_cl": { text:"El veredicto del cliente...", desc:"¿Habrá valido la pena todo el esfuerzo?", audio:"05_escena3_cl.mp3",
+    choices:[
+      { text:"Agradecer y cerrar", next:"decision3_A", good:false },
+      { text:"Proponer reunión de mejoras", next:"decision3_B", good:true }
+    ]
+  },
+  decision3_A: { text:"Cierras la conversación...", desc:"A veces, menos es más.", audio:"06_decision3_opcionA_host.mp3", next:"debrief" },
+  decision3_B: { text:"Vas un paso más allá...", desc:"Construir relaciones toma tiempo y dedicación.", audio:"06_decision3_opcionB_host.mp3", next:"debrief" },
+  debrief: { text:"¿Cómo te fue?", desc:"Reflexiona sobre tu desempeño y aprende para la próxima.", audio:"07_debrief_host.mp3" }
+};
+
+/* ------------------------------
+   Estado y puntuación
+   ------------------------------ */
+let currentScene = "inicio";
+let score = 2;
+function registerChoice(choice){ if(choice.good) score++; updateLog(choice.text); }
+function updateLog(txt){
+  if(!txt) return;
+  const now = new Date().toLocaleTimeString();
+  logEl.textContent += `\n• ${now} – ${txt}`;
+}
+
+/* ------------------------------
+   Helpers (format time)
+   ------------------------------ */
+function formatTime(sec){
+  if(!sec || isNaN(sec)) return '0:00';
+  const m = Math.floor(sec/60);
+  const s = Math.floor(sec%60);
+  return m + ':' + (s<10 ? '0' : '') + s;
+}
+
+/* ------------------------------
+   Intro player behavior
+   ------------------------------ */
+(function initIntroPlayer(){
+  playBtnIntro.addEventListener('click', ()=>{
+    if(introAudio.paused){ introAudio.play().catch(()=>{}); playBtnIntro.textContent = '▌▌'; }
+    else { introAudio.pause(); playBtnIntro.textContent = '▶'; }
+  });
+  introAudio.addEventListener('timeupdate', ()=>{
+    const pct = (introAudio.currentTime / (introAudio.duration || 1)) * 100;
+    progressFillIntro.style.width = pct + '%';
+    timeIntro.textContent = formatTime(introAudio.currentTime);
+  });
+  introAudio.addEventListener('ended', ()=>{ playBtnIntro.textContent = '▶'; });
+  progressBarIntro.addEventListener('click', (e)=>{
+    const w = progressBarIntro.clientWidth;
+    const x = e.offsetX;
+    const dur = introAudio.duration || 1;
+    introAudio.currentTime = (x / w) * dur;
+  });
+})();
+
+/* ------------------------------
+   Main player: load scenes and flow
+   ------------------------------ */
+function loadScene(name){
+  const scene = scenes[name];
+  if(!scene) return;
+  currentScene = name;
+  if(mainPlayer.classList.contains('hidden')) mainPlayer.classList.remove('hidden');
+
+  segmentTitle.textContent = scene.text || '';
+  segmentDesc.textContent = scene.desc || '';
+  choicesDiv.innerHTML = '';
+
+  audioMain.src = scene.audio || '';
+  audioMain.currentTime = 0;
+  progressFillMain.style.width = '0%';
+  timeMain.textContent = '0:00';
+  audioMain.play().catch(()=>{});
+  playBtnMain.textContent = '▌▌';
+
+  audioMain.onended = function(){
+    if(scene.choices && scene.choices.length > 0){
+      scene.choices.forEach((choice, idx)=>{
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.textContent = choice.text;
+        setTimeout(()=> btn.classList.add('show'), idx * 80);
+        btn.onclick = () => {
+          registerChoice(choice);
+          loadScene(choice.next);
+        };
+        choicesDiv.appendChild(btn);
+      });
+    } else if(scene.next){
+      loadScene(scene.next);
+    } else {
+      showDebrief();
+    }
+  };
+}
+
+/* main player controls */
+playBtnMain.addEventListener('click', ()=>{
+  if(audioMain.paused){ audioMain.play().catch(()=>{}); playBtnMain.textContent = '▌▌'; }
+  else { audioMain.pause(); playBtnMain.textContent = '▶'; }
+});
+audioMain.addEventListener('timeupdate', ()=>{
+  const pct = (audioMain.currentTime / (audioMain.duration || 1)) * 100;
+  progressFillMain.style.width = pct + '%';
+  timeMain.textContent = formatTime(audioMain.currentTime);
+});
+progressBarMain.addEventListener('click', (e)=>{
+  const w = progressBarMain.clientWidth;
+  const x = e.offsetX;
+  const dur = audioMain.duration || 1;
+  audioMain.currentTime = (x / w) * dur;
+});
+
+/* ------------------------------
+   Debrief / Closing with feedback & restart
+   ------------------------------ */
+function showDebrief(){
+  mainPlayer.classList.add('hidden');
+
+  let title='', body='';
+  if(score >= 4){
+    title = 'Excelente manejo del cliente';
+    body = `<p>Desde el primer momento supiste leer la situación. Escuchaste con calma, entendiste lo que realmente preocupaba al cliente y actuaste con decisión. Lograste que pasara de la molestia a la confianza, y eso no ocurre por casualidad: fue tu empatía, tu claridad y tu tono sereno los que marcaron la diferencia. Cerraste la conversación dejando la sensación de que todo estaba bajo control.</p>`;
+  } else if(score === 3){
+    title = 'Buen desempeño';
+    body = `<p>Tu reacción fue positiva: mantuviste la calma, escuchaste y buscaste una salida rápida. Aun así, hubo pequeños momentos en los que el cliente necesitaba un poco más de seguridad o confirmación antes de avanzar. Lo hiciste bien, pero con un poco más de atención a los detalles y al tono emocional de la conversación, podrías haber convertido una buena respuesta en una gran experiencia.</p>`;
+  } else {
+    title = 'Oportunidad de mejora';
+    body = `<p>Saliste a resolver de inmediato, pero el cliente no sintió que lo hubieras escuchado del todo. En tu intención de actuar rápido, algunas partes de la historia quedaron sin responder. A veces, una pausa para entender mejor puede cambiar todo el rumbo. Escuchar con empatía, validar lo que oyes y luego ofrecer una solución te permitirá manejar incluso los momentos más tensos con confianza.</p>`;
+  }
+
+  const html = document.createElement('div');
+  html.className = 'closing';
+  html.innerHTML = `
+    <h2>${title}</h2>
+    ${body}
+    <div style="text-align:center;margin-top:24px">
+      <button id="restartBtn">Reiniciar experiencia</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:20px;text-align:center">AudioTelling by Euno – Gracias por participar.</p>
+  `;
+  closingContainer.innerHTML = '';
+  closingContainer.appendChild(html);
+
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    score = 0;
+    currentScene = 'inicio';
+    logEl.textContent = 'Registro de decisiones: (vacío)';
+    closingContainer.innerHTML = '';
+    welcomeScreen.style.display = 'block';
+    mainPlayer.classList.add('hidden');
+    try { introAudio.currentTime = 0; progressFillIntro.style.width='0%'; timeIntro.textContent='0:00'; } catch(e){}
+  });
+}
+
+/* ------------------------------
+   Start button behavior
+   ------------------------------ */
+startBtn.addEventListener('click', ()=>{
+  introAudio.play().catch(()=>{});
+  playBtnIntro.textContent = '▌▌';
+
+  introAudio.onended = () => {
+    welcomeScreen.style.display = 'none';
+    mainPlayer.classList.remove('hidden');
+    loadScene(currentScene);
+  };
+});
+
+/* ------------------------------
+   Initialize UI state
+   ------------------------------ */
+(function init(){
+  mainPlayer.classList.add('hidden');
+  logEl.textContent = 'Registro de decisiones: (vacío)';
+})();
+</script>
+</body>
+</html>
