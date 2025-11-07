@@ -225,7 +225,7 @@ const scenes = {
   escena2: { text:"La presión aumenta...", desc:"Tu siguiente movimiento será crucial.", audio:"03_escena2_host.mp3",
     choices:[
       { text:"Llamar al editor y corregir en 2 horas", next:"decision2_A", good:true },
-      { text:"Ofrecer enviar mañana con descuento", next:"decision2_B", good:false }
+      { text:"Ofrecer enviar mañana con un descuento", next:"decision2_B", good:false }
     ]
   },
   decision2_A: { text:"La respuesta del cliente...", desc:"¿Habrás dado en el clavo?", audio:"04_decision2_rutaA_cl.mp3", next:"04_decision2_rutaA_host" },
@@ -236,8 +236,8 @@ const scenes = {
   escena3: { text:"Momento de la entrega final...", desc:"Este es el momento de la verdad.", audio:"05_escena3_host.mp3", next:"05_escena3_cl" },
   "05_escena3_cl": { text:"El veredicto del cliente...", desc:"¿Habrá valido la pena todo el esfuerzo?", audio:"05_escena3_cl.mp3",
     choices:[
-      { text:"Agradecer y cerrar", next:"decision3_A", good:false },
-      { text:"Proponer reunión de mejoras", next:"decision3_B", good:true }
+      { text:"Agradecer y cerrar la entrega", next:"decision3_A", good:false },
+      { text:"Proponer una reunión de retroalimentación ", next:"decision3_B", good:true }
     ]
   },
   decision3_A: { text:"Cierras la conversación...", desc:"A veces, menos es más.", audio:"06_decision3_opcionA_host.mp3", next:"debrief" },
@@ -355,13 +355,13 @@ function showDebrief(){
 
   let title='', body='';
   if(score >= 4){
-    title = 'Excelente manejo del cliente';
+    title = 'Excelente manejo del cliente ⚡';
     body = `<p>Desde el primer momento supiste leer la situación. Escuchaste con calma, entendiste lo que realmente preocupaba al cliente y actuaste con decisión. Lograste que pasara de la molestia a la confianza, y eso no ocurre por casualidad: fue tu empatía, tu claridad y tu tono sereno los que marcaron la diferencia. Cerraste la conversación dejando la sensación de que todo estaba bajo control.</p>`;
   } else if(score === 3){
-    title = 'Buen desempeño';
+    title = 'Buen desempeño 🎧';
     body = `<p>Tu reacción fue positiva: mantuviste la calma, escuchaste y buscaste una salida rápida. Aun así, hubo pequeños momentos en los que el cliente necesitaba un poco más de seguridad o confirmación antes de avanzar. Lo hiciste bien, pero con un poco más de atención a los detalles y al tono emocional de la conversación, podrías haber convertido una buena respuesta en una gran experiencia.</p>`;
   } else {
-    title = 'Oportunidad de mejora';
+    title = 'Oportunidad de mejora  💬';
     body = `<p>Saliste a resolver de inmediato, pero el cliente no sintió que lo hubieras escuchado del todo. En tu intención de actuar rápido, algunas partes de la historia quedaron sin responder. A veces, una pausa para entender mejor puede cambiar todo el rumbo. Escuchar con empatía, validar lo que oyes y luego ofrecer una solución te permitirá manejar incluso los momentos más tensos con confianza.</p>`;
   }
 
